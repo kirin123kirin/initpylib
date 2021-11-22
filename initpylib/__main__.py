@@ -114,7 +114,7 @@ def main():
     rencopy_all(common, targetdir, True)
     rencopy_all(srcdir, targetdir, False)
 
-    shutil.copytree(pjoin(thisdir, "..", ".vscode"), pjoin(targetdir, ".vscode"))
+    # shutil.copytree(pjoin(thisdir, "..", ".vscode"), pjoin(targetdir, ".vscode"))
 
     print(finishmsg.format(targetdir=targetdir, REPOHOME=REPOHOME, pjname=pjname))
 
