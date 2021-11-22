@@ -39,9 +39,6 @@ compiled_executefiles = [
     skbuild.constants.CMAKE_BUILD_DIR() + '/foo.exe',
 ]
 
-setup_requires = [
-]
-
 cmake_args = {
     "common": [
     ],
@@ -79,11 +76,6 @@ if arg.is_debug and arg.build_type != "Debug":
     sys.argv.extend(['--build-type', "Debug"])
 
 
-# Require pytest-runner only when running tests
-if any(arg in sys.argv for arg in ('pytest', 'test')):
-    setup_requires.extend(['pytest-runner>=2.0,<3dev'])
-
-
 # Readme badge link update.
 updatebadge.readme(pjoin(thisdir, "README.md"), new_version=__version__)
 
@@ -103,9 +95,11 @@ if isposix and any(x.startswith("bdist") for x in sys.argv) \
         from tools.platforms import get_platname_32bit
         sys.argv.extend(["--plat-name", get_platname_32bit()])
 
+# Require pytest-runner only when running tests
+is_test = 'pytest' in sys.argv or 'test' in sys.argv
 # Other Setting to setup.cfg
 setup(
     packages=[PROJECT_NAME],
     scripts=compiled_executefiles,
-    setup_requires=setup_requires
+    setup_requires=['pytest-runner>=2.0,<3dev'] if is_test else []
 )

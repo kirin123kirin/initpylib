@@ -1,5 +1,5 @@
 # initpylib
-[![Upload pypi.org](https://github.com/kirin123kirin/initpylib/actions/workflows/pypi.yml/badge.svg?branch=v0.2.2)](https://github.com/kirin123kirin/initpylib/actions/workflows/pypi.yml)
+[![Upload pypi.org](https://github.com/kirin123kirin/initpylib/actions/workflows/pypi.yml/badge.svg?branch=v0.3.0)](https://github.com/kirin123kirin/initpylib/actions/workflows/pypi.yml)
 
 ## Generate Python project.
 
@@ -11,5 +11,6 @@
 
 # Quick start
 ```shell
-~ $ initpylib capi ./foo         # Build Python Project Skelton.
+~ $ initpylib capi ./foo       # Build C/C++ API Python Project Skelton.
+~ $ initpylib py ./bar         # Build Pure Python Project Skelton.
 ```

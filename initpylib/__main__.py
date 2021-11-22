@@ -3,6 +3,7 @@
 
 import os
 import sys
+import shutil
 
 from os.path import exists, abspath, basename, dirname, join as pjoin
 
@@ -24,8 +25,10 @@ def rencopy_contents(srcpath, targetpath):
         else:
             w.write(content)
 
-def rencopy_all(srcdir, targetdir):
+def rencopy_all(srcdir, targetdir, skip_packagedir):
     excludes = ["build", "dist", ".history", "initpylib.egg-info", "__pycache__"]
+    if skip_packagedir:
+        excludes.append(REPKEY)
 
     def is_skip(f):
         for e in excludes:
@@ -81,19 +84,21 @@ def main():
 
     def build_subps(subcmdname, help):
         subps_args = subps.add_parser(subcmdname, help=help)
-        subps_args.set_defaults(template="templates_" + subcmdname)
+        subps_args.set_defaults(template="templates_" + ("common" if subcmdname == "py" else subcmdname))
         subps_args.add_argument("new_projectpath",
                                 help="Build New Project Directory Path(default build in current directory)")
 
     build_subps("capi", "Build Python C/C++ Extension API Module Project")
+    build_subps("py", "Build Pure Python Module Project")
 
     args = ps.parse_args()
 
     thisdir = dirname(__file__)
     if hasattr(args, 'template'):
         srcdir = abspath(pjoin(thisdir, args.template))
+        common = abspath(pjoin(thisdir, "templates_common"))
         if not exists(srcdir):
-            raise RuntimeError("Error exists Any Bugs..")
+            raise RuntimeError("Error exists Any Bugs.\nWhere Source Directory" + srcdir)
     else:
         ps.print_help()
         sys.exit(1)
@@ -106,7 +111,10 @@ def main():
     pjname = basename(targetdir)
     pjname_B = pjname.encode()
 
-    rencopy_all(srcdir, targetdir)
+    rencopy_all(common, targetdir, True)
+    rencopy_all(srcdir, targetdir, False)
+
+    shutil.copytree(pjoin(thisdir, "..", ".vscode"), pjoin(targetdir, ".vscode"))
 
     print(finishmsg.format(targetdir=targetdir, REPOHOME=REPOHOME, pjname=pjname))
 
