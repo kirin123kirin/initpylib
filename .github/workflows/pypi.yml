@@ -48,7 +48,7 @@ jobs:
             run:   |
                    flake8
                    python setup.py test
-                   python setup.py sdist --formats=gztar,zip
+                   python setup.py sdist --formats=gztar
                    twine check --strict dist/*
          -
             name: Save whl file to artifact
@@ -75,5 +75,4 @@ jobs:
                PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
             run:   |
                    pip install twine
-                   twine upload --verbose --skip-existing -u "$TEST_PYPI_USERNAME" -p "$TEST_PYPI_PASSWORD" --repository-url https://test.pypi.org/legacy/ ./*.gz
-                   twine upload --verbose --skip-existing -u "$TEST_PYPI_USERNAME" -p "$TEST_PYPI_PASSWORD" --repository-url https://test.pypi.org/legacy/ ./*.zip
+                   twine upload --verbose --skip-existing -u "$TEST_PYPI_USERNAME" -p "$TEST_PYPI_PASSWORD" --repository-url https://test.pypi.org/legacy/ ./*
