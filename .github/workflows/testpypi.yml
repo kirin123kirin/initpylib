@@ -44,7 +44,7 @@ jobs:
             run:   |
                    flake8
                    python setup.py test
-                   python setup.py sdist --formats=gztar
+                   python setup.py sdist --formats=gztar,zip
                    twine check --strict dist/*
          -
             name: Save whl file to artifact
