@@ -59,11 +59,12 @@ if you wan't Git Management.
     cd {targetdir}
     git init
     git add .
-    git submodule update -i
+    git submodule add {REPOHOME}/.vscode.git
     git commit -m "first commit"
     git branch -M main
     git remote add origin {REPOHOME}/{pjname}.git
-    git push -u origin main  #-> Input git hub Username, Password
+    git push -u origin main
+    # --> Input your github.com Username, Password
 
 OK Enjoy!
 """
