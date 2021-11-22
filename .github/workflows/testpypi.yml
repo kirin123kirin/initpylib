@@ -71,5 +71,5 @@ jobs:
                TEST_PYPI_PASSWORD: ${{ secrets.TEST_PYPI_PASSWORD }}
             run:   |
                    pip install twine
-                   twine upload --verbose --skip-existing -u "$TEST_PYPI_USERNAME" -p "$TEST_PYPI_PASSWORD" --repository-url https://test.pypi.org/legacy/ ./*
-
+                   twine upload --verbose --skip-existing -u "$TEST_PYPI_USERNAME" -p "$TEST_PYPI_PASSWORD" --repository-url https://test.pypi.org/legacy/ ./*.gz
+                   twine upload --verbose --skip-existing -u "$TEST_PYPI_USERNAME" -p "$TEST_PYPI_PASSWORD" --repository-url https://test.pypi.org/legacy/ ./*.zip
