@@ -19,7 +19,9 @@ jobs:
       strategy:
          matrix:
             platform: [
+                  windows-latest,
                   ubuntu-latest,
+                  macos-latest
             ]
             python-version: [
                   3.9,
@@ -48,6 +50,9 @@ jobs:
             run:   |
                    flake8
                    python setup.py test
+                   pip install -e .
+                   cd tests && pytest && cd ..
+                   python setup.py bdist_wheel
                    python setup.py sdist --formats=gztar
                    twine check --strict dist/*
          -

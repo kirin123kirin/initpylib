@@ -3,7 +3,6 @@
 
 import os
 import sys
-import shutil
 
 from os.path import exists, abspath, basename, dirname, join as pjoin
 
@@ -26,7 +25,7 @@ def rencopy_contents(srcpath, targetpath):
             w.write(content)
 
 def rencopy_all(srcdir, targetdir):
-    excludes = [".git", ".history"]
+    excludes = ["build", "dist", ".history", "initpylib.egg-info", "__pycache__"]
 
     def is_skip(f):
         for e in excludes:
@@ -51,8 +50,6 @@ def rencopy_all(srcdir, targetdir):
             targetpath = pjoin(parent, f).replace(REPKEY, pjname)
             rencopy_contents(pjoin(root, f), targetpath)
 
-    shutil.copytree(pjoin(srcdir, "..", ".vscode"), pjoin(targetdir, ".vscode"))
-
 
 finishmsg = """
 Success `{targetdir}` Project Initialize.
@@ -62,11 +59,13 @@ if you wan't Git Management.
     cd {targetdir}
     git init
     git add .
+    git submodule update -i
     git commit -m "first commit"
     git branch -M main
     git remote add origin {REPOHOME}/{pjname}.git
-    git push -u origin main
+    git push -u origin main  #-> Input git hub Username, Password
 
+OK Enjoy!
 """
 
 

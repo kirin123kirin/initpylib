@@ -3,7 +3,10 @@
 import sys
 import os
 from tempfile import TemporaryDirectory
-from main import main
+try:
+    from __main__ import main
+except (ModuleNotFoundError, ImportError):
+    from initpylib.__main__ import main
 
 origargs = sys.argv.copy()
 
@@ -45,3 +48,20 @@ def test_script_call_capi():
     else:
         AssertionError
 
+
+if __name__ == '__main__':
+    import os
+    import traceback
+
+    curdir = os.getcwd()
+    try:
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        for fn, func in dict(locals()).items():
+            if fn.startswith("test_"):
+                print("Runner: %s" % fn)
+                func()
+    except Exception as e:
+        traceback.print_exc()
+        raise (e)
+    finally:
+        os.chdir(curdir)

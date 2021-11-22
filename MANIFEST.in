@@ -1,5 +1,4 @@
 include README.md
 include LICENSE
 include setup.cfg
-recursive-include templates_capi *
-recursive-include .vscode *
+recursive-include initpylib/templates_capi *

@@ -3,6 +3,5 @@
 import sys
 from setuptools import setup
 
-# glob._ishidden = lambda x: False
-
-setup(setup_requires=['pytest-runner>=2.0,<3dev'] if 'pytest' in sys.argv or 'test' in sys.argv else [])
+is_test = 'pytest' in sys.argv or 'test' in sys.argv
+setup(setup_requires=['pytest-runner>=2.0,<3dev'] if is_test else [])

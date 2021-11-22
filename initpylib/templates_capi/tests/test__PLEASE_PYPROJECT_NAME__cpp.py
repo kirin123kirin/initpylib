@@ -5,7 +5,11 @@ import os
 from timeit import timeit
 from psutil import Process
 
-from _PLEASE_PYPROJECT_NAME_ import _PLEASE_PYPROJECT_NAME_
+try:
+    from _PLEASE_PYPROJECT_NAME_ import _PLEASE_PYPROJECT_NAME_
+except (ModuleNotFoundError, ImportError):
+    from _PLEASE_PYPROJECT_NAME_._PLEASE_PYPROJECT_NAME_ import _PLEASE_PYPROJECT_NAME_
+
 
 process = Process(os.getpid())
 def memusage():
