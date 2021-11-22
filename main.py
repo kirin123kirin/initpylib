@@ -51,7 +51,7 @@ def rencopy_all(srcdir, targetdir):
             targetpath = pjoin(parent, f).replace(REPKEY, pjname)
             rencopy_contents(pjoin(root, f), targetpath)
 
-    shutil.copytree(pjoin(srcdir, ".vscode"), pjoin(targetdir, ".vscode"))
+    shutil.copytree(pjoin(srcdir, "..", ".vscode"), pjoin(targetdir, ".vscode"))
 
 
 finishmsg = """
