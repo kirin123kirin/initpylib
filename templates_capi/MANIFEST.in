@@ -2,6 +2,5 @@ include README.md
 include VERSION
 include LICENSE
 include setup.cfg
-include pyproject.toml
 include CMakeLists.txt
 recursive-include extern *
