@@ -14,7 +14,7 @@ from tools import updatebadge
 # If you wan't install compiled scripts by C++ etc
 
 
-PROJECT_NAME = _PLEASE_PYPROJECT_NAME_
+PROJECT_NAME = '_PLEASE_PYPROJECT_NAME_'
 
 # -------------------------------------------------------------------------
 

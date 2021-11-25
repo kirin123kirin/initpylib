@@ -41,8 +41,6 @@ class PJtemplate(object):
         self.REPLACES_DICT = {}
         self.EXCLUDES = ["build", "dist", ".history", "initpylib.egg-info", "__pycache__", ".egg"]
         self._REPLACES_DICT_B = None
-        self._targetdir = None
-        self._srcdir = None
 
     @property
     def REPLACES_DICT_B(self):
@@ -120,19 +118,7 @@ class PJtemplate(object):
             shutil.copytree(pjoin(thisdir, "..", ".vscode"), pjoin(a.targetdir, ".vscode"))
             if not a.quit:
                 print(finishmsg_with_user_operation(targetdir=a.targetdir, pjname=a.pjname))
-        return self
-
-    @property
-    def srcdir(self):
-        if self._srcdir is None:
-            self._srcdir = self.args.srcdir
-        return self._srcdir
-
-    @property
-    def targetdir(self):
-        if self._targetdir is None:
-            self._targetdir = self.args.targetdir
-        return self._targetdir
+        return a.targetdir
 
     @property
     def args(self):
@@ -154,7 +140,7 @@ class PJtemplate(object):
             build_subps("py", "Build Pure Python Module Project")
 
             ps.add_argument("-g", "--gitinit", type=str, help=f"build github new repository baseurl (default {REPOHOME})")
-            ps.add_argument("-q", "--quit", action="store_true", help=f"stdout print quit mode. (default False)")
+            ps.add_argument("-q", "--quit", action="store_true", help="stdout print quit mode. (default False)")
 
             self._args = ps.parse_args(self.argv)
 
@@ -185,12 +171,13 @@ class PJtemplate(object):
 def main(argv=sys.argv):
     orgdir = abspath(os.getcwd())
     try:
-        tmpl = PJtemplate(argv).run()
-        os.chdir(tmpl.targetdir)
-    except:
+        targetdir = PJtemplate(argv).run()
+        os.chdir(targetdir)
+    except Exception:
         traceback.print_exc(file=sys.stderr)
     finally:
         os.chdir(orgdir)
+
 
 if __name__ == "__main__":
     main()

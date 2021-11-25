@@ -4,8 +4,6 @@ import sys
 import os
 from os.path import exists, dirname, join as pjoin
 thisdir = dirname(__file__)
-from tools.setup_preinit import TARGET, SRCDIR
-from glob import glob
 
 __version__ = open(pjoin(thisdir, "VERSION"), "r").read().strip()
 
@@ -26,14 +24,14 @@ islinux = platform.system() == "Linux"
 # If you wan't install compiled scripts by C++ etc
 
 
-PROJECT_NAME = _PLEASE_PYPROJECT_NAME_
+PROJECT_NAME = '_PLEASE_PYPROJECT_NAME_'
 
 skbuild.constants.SKBUILD_DIR = lambda: "build"  # If you wan't change build directory name
 
 exename = '_PLEASE_EXECUTABLE_FILENAME_'
 ext = ".exe" if iswin else ""
 if not exename.endswith(ext):
-	exename += ext
+    exename += ext
 
 compiled_executefiles = [
     pjoin(skbuild.constants.CMAKE_BUILD_DIR(), exename),
