@@ -4,7 +4,7 @@
 import os
 import sys
 import shutil
-from os.path import exists, abspath, basename, dirname, join as pjoin
+from os.path import exists, abspath, basename, dirname, normpath, join as pjoin
 import argparse
 from subprocess import getstatusoutput
 import traceback
@@ -13,13 +13,13 @@ sep = os.sep
 
 REPOHOME = "https://github.com/kirin123kirin"
 
-POST_BUILD_AUTO_COMMANDS = f"""
+POST_BUILD_AUTO_COMMANDS = """
 git init
 git clone https://github.com/kirin123kirin/.vscode.git
 git add .
 git commit -m "first commit"
 git branch -M main
-git remote add origin {REPOHOME}/{{pjname}}.git
+git remote add origin {gitiniturl}
 git push -u origin main
 """
 
@@ -34,6 +34,11 @@ if you wan't Git Management.
 OK Enjoy!
 """.format
 
+gitdesc = f"""
+build github new repository baseurl
+  (default {REPOHOME + '/[new_projectname].git'})
+  if you need git no init when option input `-g=None`.
+"""
 class PJtemplate(object):
     def __init__(self, argv=sys.argv):
         self.argv = argv
@@ -45,7 +50,7 @@ class PJtemplate(object):
     @property
     def REPLACES_DICT_B(self):
         if not self._REPLACES_DICT_B:
-            self._REPLACES_DICT_B = {k.encode(): v.encode() for k, v in self.REPLACES_DICT_B.items()}
+            self._REPLACES_DICT_B = {k.encode(): v.encode() for k, v in self.REPLACES_DICT.items()}
         return self._REPLACES_DICT_B
 
     def replacer(self, dat):
@@ -64,21 +69,20 @@ class PJtemplate(object):
         def is_skip(f):
             for e in excludes:
                 e = sep + e
-                if f.endswith(e) or e + sep in f:
+                if f.endswith(e) or (e + sep) in f:
                     return True
             return False
 
         for root, dirs, files in os.walk(srcdir):
-
             parent = root.replace(srcdir, targetdir)
             if is_skip(parent):
                 continue
 
-            for targetdir in dirs:
-                if targetdir in excludes:
+            for td in dirs:
+                if td in excludes:
                     continue
 
-                abstardir = pjoin(parent, targetdir)
+                abstardir = pjoin(parent, td)
                 abstardir = self.replacer_first(abstardir)
 
                 if not exists(abstardir):
@@ -87,7 +91,6 @@ class PJtemplate(object):
             for f in files:
                 abstarfile = pjoin(parent, f)
                 abstarfile = self.replacer_first(abstarfile)
-
                 with open(pjoin(root, f), "rb") as r, open(abstarfile, "wb") as w:
                     w.write(self.replacer(r.read()))
 
@@ -95,7 +98,7 @@ class PJtemplate(object):
         code, dat = getstatusoutput(cmd)
         if code == 0:
             if not self.args.quit:
-                print("Run: {cmd}")
+                print(f"Run: {cmd}")
             return dat
         else:
             raise RuntimeError(f"Fail command {cmd}.\nreturn code: {code}\nreturn value:{dat}")
@@ -108,16 +111,16 @@ class PJtemplate(object):
         self.rencopy_all(a.common, a.targetdir, [a.pjname])
         self.rencopy_all(a.srcdir, a.targetdir)
 
-        if a.gitroot:
+        if a.gitiniturl:
             os.chdir(a.targetdir)
             for cmd in POST_BUILD_AUTO_COMMANDS.splitlines():
-                self._command(cmd.format(pjname=a.pjname))
+                self._command(cmd.format(gitiniturl=a.gitiniturl))
             if not a.quit:
                 print("Finished git initialize.")
         else:
             shutil.copytree(pjoin(thisdir, "..", ".vscode"), pjoin(a.targetdir, ".vscode"))
             if not a.quit:
-                print(finishmsg_with_user_operation(targetdir=a.targetdir, pjname=a.pjname))
+                print(finishmsg_with_user_operation(targetdir=a.targetdir, gitiniturl=a.gitiniturl))
         return a.targetdir
 
     @property
@@ -130,21 +133,20 @@ class PJtemplate(object):
 
             subps = ps.add_subparsers()
 
-            def build_subps(subcmdname, help):
+            def add_subcmd(subcmdname, help):
                 subps_args = subps.add_parser(subcmdname, help=help)
                 subps_args.set_defaults(template="templates_" + ("common" if subcmdname == "py" else subcmdname))
-                subps_args.add_argument("new_projectpath",
+                subps_args.add_argument("new_projectpath", type=normpath,
                                         help="Build New Project Directory Path(default build in current directory)")
 
-            build_subps("capi", "Build Python C/C++ Extension API Module Project")
-            build_subps("py", "Build Pure Python Module Project")
+            add_subcmd("capi", "Build Python C/C++ Extension API Module Project")
+            add_subcmd("py", "Build Pure Python Module Project")
 
-            ps.add_argument("-g", "--gitinit", type=str,
-                            help=f"build github new repository baseurl (default {REPOHOME})", default=REPOHOME)
+            ps.add_argument("-g", "--gitiniturl", type=str, help=gitdesc, default=None)
             ps.add_argument("-q", "--quit", action="store_true",
                             help="stdout print quit mode. (default False)")
 
-            self._args = ps.parse_args(self.argv)
+            self._args = ps.parse_args(self.argv[1:])
 
             if hasattr(self._args, 'template'):
                 srcdir = abspath(pjoin(thisdir, self._args.template))
@@ -155,7 +157,8 @@ class PJtemplate(object):
                 ps.print_help()
                 sys.exit(1)
 
-            pjname = basename(self._args.new_projectpath)
+            targetdir = abspath(self._args.new_projectpath)
+            pjname = basename(targetdir)
 
             global REPLACES_DICT
             self.REPLACES_DICT.update({
@@ -166,8 +169,10 @@ class PJtemplate(object):
             self._args.pjname = pjname
             self._args.common = common
             self._args.srcdir = srcdir
-            self._args.targetdir = self._args.new_projectpath
-            self._args.gitroot = self._args.gitinit
+            self._args.targetdir = targetdir
+            if self._args.gitiniturl and "github.com/" not in self._args.gitiniturl:
+                print(f"Warning: {self._args.gitiniturl} is github repository url?", sys.stderr)
+
         return self._args
 
 def main(argv=sys.argv):

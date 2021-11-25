@@ -10,14 +10,20 @@ except (ModuleNotFoundError, ImportError):
 
 origargs = sys.argv.copy()
 
-def test_script_call_capi_ok_test():
+def _script_call_capi_ok_test(subcmd):
     sys.argv[:] = origargs
     tmpdir = TemporaryDirectory()
-    sys.argv.extend(["capi", tmpdir.name])
+    sys.argv.extend([subcmd, tmpdir.name])
     main()
     tmp_n = sum(len(dirs) + len(files) for _, dirs, files in os.walk("templates_capi"))
     build_n = sum(len(dirs) + len(files) for _, dirs, files in os.walk(tmpdir.name))
     assert(build_n >= tmp_n)
+
+def test_script_call_capi_ok_test():
+    _script_call_capi_ok_test("capi")
+
+def test_script_call_py_ok_test():
+    _script_call_capi_ok_test("py")
 
 def test_script_call_exception_test1():
     sys.argv[:] = origargs
