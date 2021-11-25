@@ -4,46 +4,48 @@ import sys
 import os
 from os.path import exists, dirname, join as pjoin
 thisdir = dirname(__file__)
+from tools.setup_preinit import TARGET, SRCDIR
+from glob import glob
 
 __version__ = open(pjoin(thisdir, "VERSION"), "r").read().strip()
 
 import shutil
 import argparse
-from distutils.ccompiler import get_default_compiler
+
 from tools import updatebadge
 import skbuild.constants
+import platform
 
-from distutils.dist import Distribution
+# OS Environment Infomation
+iswin = os.name == "nt"
+isposix = os.name == "posix"
+islinux = platform.system() == "Linux"
 
-# setup.cfg metadata Infomation (`meta` of py dictionary)
-_dt = Distribution()
-_dt.parse_config_files()
-_dt.parse_command_line()
-_meta = _dt.get_option_dict('metadata')
-def meta(s):
-    return _meta[s][1]
 
 # Please Setting ----------------------------------------------------------
 # If you wan't install compiled scripts by C++ etc
 
 
-PROJECT_NAME = meta("name")
+PROJECT_NAME = _PLEASE_PYPROJECT_NAME_
 
 skbuild.constants.SKBUILD_DIR = lambda: "build"  # If you wan't change build directory name
 
-skbuild_opts = [
-    '--skip-generator-test',
-]
+exename = '_PLEASE_EXECUTABLE_FILENAME_'
+ext = ".exe" if iswin else ""
+if not exename.endswith(ext):
+	exename += ext
 
 compiled_executefiles = [
-    skbuild.constants.CMAKE_BUILD_DIR() + '/foo.exe',
+    pjoin(skbuild.constants.CMAKE_BUILD_DIR(), exename),
 ]
 
 cmake_args = {
+    # https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Useful-Variables
+    # https://scikit-build.readthedocs.io/en/stable/usage.html#usage-scikit-build-options
     "common": [
     ],
     "nt": [
-        '-G', "Visual Studio 16 2019",
+        '-G', "Ninja",
     ],
     "posix": [
     ]
@@ -51,15 +53,6 @@ cmake_args = {
 # -------------------------------------------------------------------------
 
 from skbuild import setup
-
-# OS Environment Infomation
-iswin = os.name == "nt"
-isposix = os.name == "posix"
-ismsvc = get_default_compiler() == "msvc"
-
-sys.argv.extend(skbuild_opts)
-sys.argv.extend(cmake_args["common"] + cmake_args.get(os.name, []))
-
 
 ps = argparse.ArgumentParser()
 ps.add_argument('-f', '--force', action="store_true", dest="is_force")
@@ -86,7 +79,7 @@ if compiled_executefiles:
 
 
 # Edit posix platname for pypi upload error
-if isposix and any(x.startswith("bdist") for x in sys.argv) \
+if islinux and any(x.startswith("bdist") for x in sys.argv) \
         and not ("--plat-name" in sys.argv or "-p" in sys.argv):
     if "64" in os.uname()[-1]:
         from tools.platforms import get_platname_64bit
@@ -100,6 +93,7 @@ is_test = 'pytest' in sys.argv or 'test' in sys.argv
 # Other Setting to setup.cfg
 setup(
     packages=[PROJECT_NAME],
+    cmake_args=cmake_args["common"] + cmake_args.get(os.name, []),
     scripts=compiled_executefiles,
     setup_requires=['pytest-runner>=2.0,<3dev'] if is_test else []
 )

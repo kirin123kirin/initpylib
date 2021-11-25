@@ -429,6 +429,7 @@ skbuild/cmake_test_compile/*
 *.env
 
 test/_*
+tests/_*
 * - コピー*
 * copy*
 

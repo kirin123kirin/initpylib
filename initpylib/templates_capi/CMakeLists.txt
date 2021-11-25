@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.12.0)
+# Check Run Command
+set(CMAKE_VERBOSE_MAKEFILE 1)
 
+# -- CMAKE Options https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Useful-Variables
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_GENERATOR Ninja)
 set(CMAKE_AR llvm-lib)
 set(CMAKE_CXX_COMPILER clang++)
 set(CMAKE_C_COMPILER clang)
@@ -18,7 +23,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR})
 
 set(PJNAME _PLEASE_PYPROJECT_NAME_)
 set(REAL_LIBNAME __PLEASE_PYPROJECT_NAME_)
-set(EXENAME foo)
+set(EXENAME _PLEASE_EXECUTABLE_FILENAME_)
 
 set(LIBRARY_SOURCES ${PJNAME}/${REAL_LIBNAME}.cxx)
 set(EXE_SOURCES ${PJNAME}/main.cpp ${CMAKE_CURRENT_BINARY_DIR})
@@ -33,15 +38,15 @@ foreach(_variableName ${_variableNames})
         message(STATUS "${_variableName}=${${_variableName}}")
 endforeach()
 
-message(STATUS "\n*** dump end ***")
-
-
 # pre setting
 project(${PJNAME})
 
 find_package(Python3 COMPONENTS Interpreter Development)
 
-set(CMAKE_MODULE_PATH ${Python3_SITELIB}/skbuild/resources/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Python3_SITELIB}/skbuild/resources/cmake)
+
+
+# message(STATUS "\n*** dump end ***")
 
 find_package(PythonExtensions REQUIRED)
 

@@ -1,5 +1,5 @@
 # initpylib
-[![Upload pypi.org](https://github.com/kirin123kirin/initpylib/actions/workflows/pypi.yml/badge.svg?branch=v0.3.0)](https://github.com/kirin123kirin/initpylib/actions/workflows/pypi.yml)
+[![Upload pypi.org](https://github.com/kirin123kirin/initpylib/actions/workflows/pypi.yml/badge.svg?branch=v0.3.1)](https://github.com/kirin123kirin/initpylib/actions/workflows/pypi.yml)
 
 ## Generate Python project.
 

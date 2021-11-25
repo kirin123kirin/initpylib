@@ -1,6 +1,8 @@
 include README.md
-include VERSION
 include LICENSE
+include VERSION
 include setup.cfg
 include CMakeLists.txt
+recursive-include tools *
 recursive-include extern *
+recursive-include _PLEASE_PYPROJECT_NAME_ *

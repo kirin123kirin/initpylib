@@ -10,21 +10,11 @@ import shutil
 import argparse
 from tools import updatebadge
 
-from distutils.dist import Distribution
-
-# setup.cfg metadata Infomation (`meta` of py dictionary)
-_dt = Distribution()
-_dt.parse_config_files()
-_dt.parse_command_line()
-_meta = _dt.get_option_dict('metadata')
-def meta(s):
-    return _meta[s][1]
-
 # Please Setting ----------------------------------------------------------
 # If you wan't install compiled scripts by C++ etc
 
 
-PROJECT_NAME = meta("name")
+PROJECT_NAME = _PLEASE_PYPROJECT_NAME_
 
 # -------------------------------------------------------------------------
 
@@ -44,6 +34,9 @@ if arg.is_force:
 # Readme badge link update.
 updatebadge.readme(pjoin(thisdir, "README.md"), new_version=__version__)
 
-# Other Setting to setup.cfg
 is_test = 'pytest' in sys.argv or 'test' in sys.argv
-setup(setup_requires=['pytest-runner>=2.0,<3dev'] if is_test else [])
+# Other Setting to setup.cfg
+setup(
+    packages=[PROJECT_NAME],
+    setup_requires=['pytest-runner>=2.0,<3dev'] if is_test else []
+)

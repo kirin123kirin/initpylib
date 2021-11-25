@@ -1,11 +1,12 @@
-#include <Python.h>
+/* csankey.cpp | MIT License | https://github.com/kirin123kirin/csankey/raw/main/LICENSE */
+#include "_PLEASE_PYPROJECT_NAME_.hpp"
 
 extern "C" PyObject* _PLEASE_PYPROJECT_NAME__py(PyObject* self, PyObject* args, PyObject* kwargs) {
     PyObject* o;
 
     const char* kwlist[2] = {"o", NULL};
 
-    if(!PyArg_ParseTupleAndKeywords(args, kwargs, "O", (char**)kwlist, &o, &header))
+    if(!PyArg_ParseTupleAndKeywords(args, kwargs, "O", (char**)kwlist, &o))
         return NULL;
 
     if(!PyList_Check(o) && !PyTuple_Check(o))
@@ -14,8 +15,8 @@ extern "C" PyObject* _PLEASE_PYPROJECT_NAME__py(PyObject* self, PyObject* args, 
     return o;
 }
 
-#define MODULE_NAME _PLEASE_PYPROJECT_NAME_
-#define MODULE_NAME_S "_PLEASE_PYPROJECT_NAME_"
+#define MODULE_NAME __PLEASE_PYPROJECT_NAME_
+#define MODULE_NAME_S "__PLEASE_PYPROJECT_NAME_"
 
 /* {{{ */
 // this module description

@@ -2,13 +2,18 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
+
 from timeit import timeit
 from psutil import Process
 
-try:
-    from _PLEASE_PYPROJECT_NAME_ import _PLEASE_PYPROJECT_NAME_
-except (ModuleNotFoundError, ImportError):
-    from _PLEASE_PYPROJECT_NAME_._PLEASE_PYPROJECT_NAME_ import _PLEASE_PYPROJECT_NAME_
+
+from os.path import dirname, abspath, join as pjoin
+shome = abspath(pjoin(dirname(__file__), ".."))
+sys.path.insert(0, pjoin(shome, "build"))
+sys.path.insert(0, pjoin(shome, "_skbuild", "cmake-install"))
+sys.path.insert(0, pjoin(shome, "build", "cmake-install"))
+from _PLEASE_PYPROJECT_NAME_ import *
 
 
 process = Process(os.getpid())
