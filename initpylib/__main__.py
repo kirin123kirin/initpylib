@@ -139,8 +139,10 @@ class PJtemplate(object):
             build_subps("capi", "Build Python C/C++ Extension API Module Project")
             build_subps("py", "Build Pure Python Module Project")
 
-            ps.add_argument("-g", "--gitinit", type=str, help=f"build github new repository baseurl (default {REPOHOME})")
-            ps.add_argument("-q", "--quit", action="store_true", help="stdout print quit mode. (default False)")
+            ps.add_argument("-g", "--gitinit", type=str,
+                            help=f"build github new repository baseurl (default {REPOHOME})", default=REPOHOME)
+            ps.add_argument("-q", "--quit", action="store_true",
+                            help="stdout print quit mode. (default False)")
 
             self._args = ps.parse_args(self.argv)
 
