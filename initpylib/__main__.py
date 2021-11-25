@@ -188,8 +188,7 @@ def main(argv=sys.argv):
         tmpl = PJtemplate(argv).run()
         os.chdir(tmpl.targetdir)
     except:
-        print(traceback.format_exc(), file=sys.stderr)
-        return RuntimeError
+        traceback.print_exc(file=sys.stderr)
     finally:
         os.chdir(orgdir)
 
