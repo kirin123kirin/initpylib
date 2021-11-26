@@ -3,7 +3,6 @@
 
 import os
 import sys
-import shutil
 from os.path import exists, abspath, basename, dirname, normpath, join as pjoin
 import argparse
 from subprocess import getstatusoutput
@@ -11,17 +10,21 @@ import traceback
 thisdir = dirname(__file__)
 sep = os.sep
 
-REPOHOME = "https://github.com/kirin123kirin"
+BUILD_AUTO_COMMANDS = """
+git clone https://github.com/kirin123kirin/.vscode.git
+""".strip()
 
 POST_BUILD_AUTO_COMMANDS = """
 git init
-git clone https://github.com/kirin123kirin/.vscode.git
 git add .
-git commit -m "first commit"
+git commit -m "first commit(build by initpylib templates.)"
+""".strip()
+
+POST_AUTO_MESSAGES = """
 git branch -M main
-git remote add origin {gitiniturl}
+git remote add origin https://github.com/[your user name]/[your repository name].git
 git push -u origin main
-"""
+""".strip()
 
 finishmsg_with_user_operation = f"""
 Success `{{targetdir}}` Project Initialize.
@@ -30,15 +33,22 @@ if you wan't Git Management.
 
     cd {{targetdir}}
     {POST_BUILD_AUTO_COMMANDS}
+    {POST_AUTO_MESSAGES}
 
 OK Enjoy!
 """.format
 
-gitdesc = f"""
-build github new repository baseurl
-  (default {REPOHOME + '/[new_projectname].git'})
-  if you need git no init when option input `-g=None`.
-"""
+def command(cmd, quit=False):
+    cmd = cmd.strip()
+    if not cmd:
+        return
+    code, dat = getstatusoutput(cmd)
+    if code == 0:
+        if not quit:
+            print(f"Run: {cmd}")
+        return dat
+    else:
+        raise RuntimeError(f"Fail command {cmd}.\nreturn code: {code}\nreturn value:{dat}")
 class PJtemplate(object):
     def __init__(self, argv=sys.argv):
         self.argv = argv
@@ -94,34 +104,26 @@ class PJtemplate(object):
                 with open(pjoin(root, f), "rb") as r, open(abstarfile, "wb") as w:
                     w.write(self.replacer(r.read()))
 
-    def _command(self, cmd):
-        code, dat = getstatusoutput(cmd)
-        if code == 0:
-            if not self.args.quit:
-                print(f"Run: {cmd}")
-            return dat
-        else:
-            raise RuntimeError(f"Fail command {cmd}.\nreturn code: {code}\nreturn value:{dat}")
-
     def run(self):
         a = self.args
         if not exists(a.targetdir):
             os.makedirs(a.targetdir)
 
-        self.rencopy_all(a.common, a.targetdir, [a.pjname])
+        self.rencopy_all(a.common, a.targetdir, [pjoin(a.srcdir, a.pjname)])
         self.rencopy_all(a.srcdir, a.targetdir)
 
-        if a.gitiniturl:
-            os.chdir(a.targetdir)
+        os.chdir(a.targetdir)
+        for cmd in BUILD_AUTO_COMMANDS.splitlines():
+            command(cmd, self.args.quit)
+
+        if a.with_git_init:
             for cmd in POST_BUILD_AUTO_COMMANDS.splitlines():
-                self._command(cmd.format(gitiniturl=a.gitiniturl))
+                command(cmd, self.args.quit)
             if not a.quit:
                 print("Finished git initialize.")
         else:
-            shutil.copytree(pjoin(thisdir, "..", ".vscode"), pjoin(a.targetdir, ".vscode"))
             if not a.quit:
-                print(finishmsg_with_user_operation(targetdir=a.targetdir, gitiniturl=a.gitiniturl))
-        return a.targetdir
+                print(finishmsg_with_user_operation(targetdir=a.targetdir))
 
     @property
     def args(self):
@@ -142,7 +144,8 @@ class PJtemplate(object):
             add_subcmd("capi", "Build Python C/C++ Extension API Module Project")
             add_subcmd("py", "Build Pure Python Module Project")
 
-            ps.add_argument("-g", "--gitiniturl", type=str, help=gitdesc, default=None)
+            ps.add_argument("-g", "--with_git_init", action="store_true",
+                            help="build with git init & commit (default False)")
             ps.add_argument("-q", "--quit", action="store_true",
                             help="stdout print quit mode. (default False)")
 
@@ -170,16 +173,13 @@ class PJtemplate(object):
             self._args.common = common
             self._args.srcdir = srcdir
             self._args.targetdir = targetdir
-            if self._args.gitiniturl and "github.com/" not in self._args.gitiniturl:
-                print(f"Warning: {self._args.gitiniturl} is github repository url?", sys.stderr)
 
         return self._args
 
 def main(argv=sys.argv):
     orgdir = abspath(os.getcwd())
     try:
-        targetdir = PJtemplate(argv).run()
-        os.chdir(targetdir)
+        PJtemplate(argv).run()
     except Exception:
         traceback.print_exc(file=sys.stderr)
     finally:
