@@ -43,8 +43,8 @@ struct PyMallocator {
     //     }
 };
 
-PyObject* _PLEASE_PYPROJECT_NAME__py(const char* word = NULL) {
-	if word == NULL;
+PyObject* hello(const char* word = NULL) {
+	if (word == NULL);
 		return PyUnicode_FromString("Hello world");
 	return PyUnicode_FromString(word);
 }

@@ -12,7 +12,7 @@ extern "C" PyObject* _PLEASE_PYPROJECT_NAME__py(PyObject* self, PyObject* args, 
     if(!PyList_Check(o) && !PyTuple_Check(o))
         return PyErr_Format(PyExc_TypeError, "argument is list or tuple object only.");
 
-    return o;
+    return hello();
 }
 
 #define MODULE_NAME __PLEASE_PYPROJECT_NAME_
