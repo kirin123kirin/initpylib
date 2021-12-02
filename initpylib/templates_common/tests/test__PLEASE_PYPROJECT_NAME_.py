@@ -3,18 +3,17 @@
 
 import os
 import sys
+
 from timeit import timeit
 from psutil import Process
-
-try:
-    from _PLEASE_PYPROJECT_NAME_ import _PLEASE_PYPROJECT_NAME_
-except (ModuleNotFoundError, ImportError):
-    from _PLEASE_PYPROJECT_NAME_._PLEASE_PYPROJECT_NAME_ import _PLEASE_PYPROJECT_NAME_
 
 from os.path import dirname, abspath, join as pjoin
 shome = abspath(pjoin(dirname(__file__), ".."))
 sys.path.insert(0, pjoin(shome, "build"))
-from _PLEASE_PYPROJECT_NAME_ import *
+try:
+    from _PLEASE_PYPROJECT_NAME_ import *
+except (ImportError, ModuleNotFoundError):
+    from _PLEASE_PYPROJECT_NAME_._PLEASE_PYPROJECT_NAME_ import *
 
 process = Process(os.getpid())
 def memusage():

@@ -1,76 +1,72 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import sys
+import re
 import os
-from os.path import exists, dirname, join as pjoin
-thisdir = dirname(__file__)
-
-__version__ = open(pjoin(thisdir, "VERSION"), "r").read().strip()
-
-import shutil
-import argparse
-
-from tools import updatebadge, scripts
-import skbuild.constants
+from os.path import dirname, join as pjoin
 import platform
 
-# OS Environment Infomation
-iswin = os.name == "nt"
-isposix = os.name == "posix"
-islinux = platform.system() == "Linux"
-
+import skbuild.constants
+skbuild.constants.SKBUILD_DIR = lambda: BUILD_DIR
+from skbuild import setup
+from tools import updatebadge, scripts
 
 # Please Setting ----------------------------------------------------------
 # If you wan't install compiled scripts by C++ etc
 
-
 PROJECT_NAME = '_PLEASE_PYPROJECT_NAME_'
 
-skbuild.constants.SKBUILD_DIR = lambda: "build"  # If you wan't change build directory name
-
 exename = '_PLEASE_EXECUTABLE_FILENAME_'
-ext = ".exe" if iswin else ""
-if not exename.endswith(ext):
-    exename += ext
 
-compiled_executefiles = [
-    pjoin(skbuild.constants.CMAKE_BUILD_DIR(), exename),
-]
+# If you wan't change build directory name
+BUILD_DIR = "build"
 
+# https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Useful-Variables
+# https://scikit-build.readthedocs.io/en/stable/usage.html#usage-scikit-build-options
 cmake_args = {
-    # https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Useful-Variables
-    # https://scikit-build.readthedocs.io/en/stable/usage.html#usage-scikit-build-options
     "common": [
+        # '-G', "Ninja",
     ],
-    "nt": [
-        '-G', "Ninja",
+    "windows": [
     ],
-    "posix": [
+    "linux": [
+    ],
+    "darwin": [
     ]
 }
 # -------------------------------------------------------------------------
 
-from skbuild import setup
+thisdir = dirname(__file__)
+__version__ = open(pjoin(thisdir, "VERSION"), "r").read().strip()
 
-ps = argparse.ArgumentParser()
-ps.add_argument('-f', '--force', action="store_true", dest="is_force")
-ps.add_argument('-g', '--debug', action="store_true", dest="is_debug")
-ps.add_argument('--build-type', default="Release")
-arg = ps.parse_known_args(sys.argv)[0]
+# OS Environment Infomation
+osname = platform.system().lower()
+iswin = os.name == "nt"
+isposix = os.name == "posix"
+islinux = osname == "linux"
+isosx = osname == "darwin"
+is_debug = "--debug" in sys.argv[1:] or re.search(r" \-[^ ]*g", " ".join(sys.argv[1:]))
+is_test = 'pytest' in sys.argv or 'test' in sys.argv
 
-if arg.is_force:
-    for d in [skbuild.constants.SKBUILD_DIR(), "dist", PROJECT_NAME + ".egg-info"]:
-        if exists(pjoin(thisdir, d)):
-            shutil.rmtree(pjoin(thisdir, d))
+# If you need executable scripts
+ext = ".exe" if iswin else ""
+if not exename.endswith(ext):
+    exename += ext
+compiled_executefiles = [
+    pjoin(skbuild.constants.CMAKE_BUILD_DIR(), exename),
+]
 
-if arg.is_debug and arg.build_type != "Debug":
-    sys.argv.extend(['--build-type', "Debug"])
+# convert to scikit-build option
+if "--build-type" not in sys.argv:
+    sys.argv.extend([
+        "--build-type", "Debug" if is_debug else "Release"
+    ])
 
 
 # Readme badge link update.
 updatebadge.readme(pjoin(thisdir, "README.md"), new_version=__version__)
 
-
+# binary file force to be scripts.(Normaly Script Only plain text file.)
 if compiled_executefiles:
     scripts.binary_always_allow()
 
@@ -82,12 +78,15 @@ if islinux and any(x.startswith("bdist") for x in sys.argv) \
     from tools.platforms import get_platname_32bit as x86
     sys.argv.extend(["--plat-name", x64() if "64" in os.uname()[-1] else x86()])
 
-# Require pytest-runner only when running tests
-is_test = 'pytest' in sys.argv or 'test' in sys.argv
-# Other Setting to setup.cfg
+
 setup(
+    # to be package directory name.
     packages=[PROJECT_NAME],
-    cmake_args=cmake_args["common"] + cmake_args.get(os.name, []),
-    scripts=compiled_executefiles,
-    setup_requires=['pytest-runner>=2.0,<3dev'] if is_test else []
+    cmake_args=cmake_args["common"] + cmake_args.get(osname, []),
+
+    # Require pytest-runner only when running tests
+    setup_requires=['pytest-runner>=2.0,<3dev'] if is_test else [],
+    
+    scripts=compiled_executefiles
 )
+# Other Setting to setup.cfg

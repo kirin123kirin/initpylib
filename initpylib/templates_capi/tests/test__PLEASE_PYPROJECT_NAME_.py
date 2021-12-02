@@ -11,9 +11,14 @@ from psutil import Process
 from os.path import dirname, abspath, join as pjoin
 shome = abspath(pjoin(dirname(__file__), ".."))
 sys.path.insert(0, pjoin(shome, "build"))
-sys.path.insert(0, pjoin(shome, "_skbuild", "cmake-install"))
+sys.path.insert(0, pjoin(shome, "build", "cmake-build"))
+sys.path.insert(0, pjoin(shome, "_skbuild", "cmake-build"))
 sys.path.insert(0, pjoin(shome, "build", "cmake-install"))
-from _PLEASE_PYPROJECT_NAME_ import *
+sys.path.insert(0, pjoin(shome, "_skbuild", "cmake-install"))
+try:
+    from _PLEASE_PYPROJECT_NAME_ import *
+except (ImportError, ModuleNotFoundError):
+    from __PLEASE_PYPROJECT_NAME_ import *
 
 
 process = Process(os.getpid())

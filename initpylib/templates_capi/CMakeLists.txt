@@ -4,6 +4,8 @@ set(CMAKE_VERBOSE_MAKEFILE 1)
 
 # -- CMAKE Options https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/Useful-Variables
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON) # if not require ERROR
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_GENERATOR Ninja)
 set(CMAKE_AR llvm-lib)
 set(CMAKE_CXX_COMPILER clang++)
