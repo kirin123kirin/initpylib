@@ -86,7 +86,7 @@ setup(
 
     # Require pytest-runner only when running tests
     setup_requires=['pytest-runner>=2.0,<3dev'] if is_test else [],
-    
+
     scripts=compiled_executefiles
 )
 # Other Setting to setup.cfg
