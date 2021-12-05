@@ -1,6 +1,6 @@
 [submodule ".vscode"]
 	path = .vscode
 	url = https://github.com/kirin123kirin/.vscode.git
-[submodule "initpylib/templates_capi/cmake-examples"]
-	path = initpylib/templates_capi/cmake-examples
+[submodule "cmake-examples"]
+	path = cmake-examples
 	url = https://github.com/kirin123kirin/cmake-examples.git
