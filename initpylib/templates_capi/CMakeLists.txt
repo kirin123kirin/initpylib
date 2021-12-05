@@ -14,6 +14,8 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Debug" AND WIN32)
 endif()
 
 ## --- Please your setting --- #######################################
+set(CMAKE_CXX_STANDARD 14)
+
 set(CMAKE_C_COMPILER clang)
 
 set(CMAKE_CXX_COMPILER clang++)
