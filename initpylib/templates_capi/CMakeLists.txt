@@ -1,24 +1,12 @@
 cmake_minimum_required(VERSION 3.15)
-# Check Run Command
-set(CMAKE_VERBOSE_MAKEFILE 1)
-## for Python skbuild setup.py setting
-if (CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
-elseif (CMAKE_BUILD_TYPE STREQUAL "Debug" AND WIN32)
-    ### Could Not run debugger.(Access violation Error)
-    ### Counter bug? : https://github.com/scikit-build/scikit-build/issues/533
-    set(CMAKE_BUILD_TYPE "Release")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
-endif()
 
-## --- Please your setting --- #######################################
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 14)
 
-set(CMAKE_C_COMPILER clang)
+## --- Please your setting --- #######################################
+# set(CMAKE_C_COMPILER clang)
 
-set(CMAKE_CXX_COMPILER clang++)
+# set(CMAKE_CXX_COMPILER clang++)
 
 project(_PLEASE_PYPROJECT_NAME_ LANGUAGES CXX C)
 
@@ -31,6 +19,11 @@ set(REAL_LIBNAME __PLEASE_PYPROJECT_NAME_)
 set(LIBRARY_SOURCES _PLEASE_PYPROJECT_NAME_/${REAL_LIBNAME}.cxx)
 
 #######################################################################
+
+string(TOLOWER "${CMAKE_BUILD_TYPE}" _cmake_build_type)
+if("${CMAKE_GENERATOR}" STREQUAL "Ninja" AND "${_cmake_build_type}" STREQUAL "pydebug")
+    include("cmake/pydebug.cmake")
+endif()
 
 # print variables
 macro(printvars)
@@ -48,41 +41,24 @@ IF (DEFINED EXENAME AND EXISTS EXE_SOURCES)
   add_executable(${EXENAME} ${EXE_SOURCES})
 ENDIF()
 
-## load Python CAPI Extentions Package
-### https://scikit-build.readthedocs.io/en/latest/cmake-modules/PythonExtensions.html#example-usage
-find_package(Python3 COMPONENTS Interpreter Development)
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Python3_SITELIB}/skbuild/resources/cmake)
-    find_package(PythonExtensions REQUIRED)
-
-    add_library(${REAL_LIBNAME} MODULE ${LIBRARY_SOURCES})
-    python_extension_module(${REAL_LIBNAME})
-    install(TARGETS ${REAL_LIBNAME} LIBRARY DESTINATION ${CMAKE_PROJECT_NAME})
-
-    ## executable file install
-    ### https://scikit-build.readthedocs.io/en/latest/cmake-modules/PythonExtensions.html#command:python_standalone_executable
-    IF (DEFINED EXENAME AND EXISTS EXE_SOURCES)
-        python_standalone_executable(${EXENAME})
-    ENDIF()
-
-
-### Example Include libxlsxwriter Project.
+### Example Depends On Include libxlsxwriter Project.
 set(EXTERNAL_LIBBUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/external-build")
 set(EXTERNAL_LIBRARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/external-install")
 
     ### Create Target Dependency Library Project Build
-    target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${EXTERNAL_LIBRARY_PATH}/include)
-    target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE ${EXTERNAL_LIBRARY_PATH}/lib)
+    target_include_directories(${REAL_LIBNAME} PRIVATE ${EXTERNAL_LIBRARY_PATH}/include)
+    target_link_directories(${REAL_LIBNAME} PRIVATE ${EXTERNAL_LIBRARY_PATH}/lib)
 
     find_library(xlsxwriter_LIBPATH xlsxwriter HINTS ${EXTERNAL_LIBRARY_PATH}/lib)
     find_library(zlibstatic_LIBPATH zlibstatic HINTS ${EXTERNAL_LIBRARY_PATH}/lib)
 
     if(xlsxwriter_LIBPATH AND zlibstatic_LIBPATH)
-        target_link_libraries(${CMAKE_PROJECT_NAME} LINK_PRIVATE xlsxwriter zlibstatic)
+        target_link_libraries(${REAL_LIBNAME} LINK_PRIVATE xlsxwriter zlibstatic)
     
     else()
 
         ### zlib External static link
-        target_link_libraries(${CMAKE_PROJECT_NAME} zlibstatic)
+        target_link_libraries(${REAL_LIBNAME} zlibstatic)
         include(ExternalProject)
 
             ### https://runebook.dev/ja/docs/cmake/module/externalproject
@@ -102,7 +78,7 @@ set(EXTERNAL_LIBRARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/external-install")
             )
 
         ### xlsxwriter External static link
-        target_link_libraries(${CMAKE_PROJECT_NAME} xlsxwriter)
+        target_link_libraries(${REAL_LIBNAME} xlsxwriter)
         include(ExternalProject)
 
             ### https://runebook.dev/ja/docs/cmake/module/externalproject
@@ -120,16 +96,45 @@ set(EXTERNAL_LIBRARY_PATH "${CMAKE_CURRENT_BINARY_DIR}/external-install")
             )
 
         add_dependencies(xlsxwriter zlibstatic)
-        add_dependencies(${CMAKE_PROJECT_NAME} xlsxwriter)
+        add_dependencies(${REAL_LIBNAME} xlsxwriter)
 
     endif()
 
-# Install to ${CMAKE_INSTALL_PREFIX} directory
-install(TARGETS ${CMAKE_PROJECT_NAME}
-        RUNTIME        DESTINATION . # bin
-        LIBRARY        DESTINATION . # lib
-        ARCHIVE        DESTINATION . # lib
-        PRIVATE_HEADER DESTINATION . # include
-        PUBLIC_HEADER  DESTINATION . # include
+set(DEPENDS_LIBRARIES xlsxwriter)
+
+## load Python CAPI Extentions Package
+### https://scikit-build.readthedocs.io/en/latest/cmake-modules/PythonExtensions.html#example-usage
+find_package(Python3 COMPONENTS Interpreter Development)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Python3_SITELIB}/skbuild/resources/cmake)
+    find_package(PythonExtensions REQUIRED)
+
+    add_library(${REAL_LIBNAME} MODULE ${LIBRARY_SOURCES})
+        target_include_directories(${REAL_LIBNAME} PRIVATE ${CMAKE_INSTALL_PREFIX}/include)
+        target_link_directories(${REAL_LIBNAME} PRIVATE ${Python3_LIBRARY_DIRS} ${CMAKE_INSTALL_PREFIX}/lib)
+
+        ### If Exists Depends Project ###
+        target_link_libraries(${REAL_LIBNAME} ${DEPENDS_LIBRARIES})
+    
+    python_extension_module(${REAL_LIBNAME})
+
+    install(
+        TARGETS
+            ${REAL_LIBNAME}
+        LIBRARY DESTINATION ${CMAKE_PROJECT_NAME}
     )
 
+    ## executable file install
+    ### https://scikit-build.readthedocs.io/en/latest/cmake-modules/PythonExtensions.html#command:python_standalone_executable
+    IF (DEFINED EXENAME AND EXISTS EXE_SOURCES)
+        python_standalone_executable(${EXENAME})
+    ENDIF()
+
+
+# Install to ${CMAKE_INSTALL_PREFIX} directory
+install(TARGETS ${CMAKE_PROJECT_NAME}
+    RUNTIME        DESTINATION . # bin
+    LIBRARY        DESTINATION . # lib
+    ARCHIVE        DESTINATION . # lib
+    PRIVATE_HEADER DESTINATION . # include
+    PUBLIC_HEADER  DESTINATION . # include
+)

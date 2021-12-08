@@ -26,6 +26,9 @@ BUILD_DIR = "build"
 cmake_args = {
     "common": [
         # '-G', "Ninja",
+        # '-G', "Visual Studio 16 2019",
+        # "-DCMAKE_C_COMPILER=clang",
+        # "-DCMAKE_CXX_COMPILER=clang++",
     ],
     "windows": [
     ],
@@ -59,7 +62,7 @@ compiled_executefiles = [
 # convert to scikit-build option
 if "--build-type" not in sys.argv:
     sys.argv.extend([
-        "--build-type", "Debug" if is_debug else "Release"
+        "--build-type", "PYDEBUG" if is_debug else "Release"
     ])
 
 
