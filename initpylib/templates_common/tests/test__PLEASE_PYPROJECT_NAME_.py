@@ -31,7 +31,10 @@ def runtimeit(funcstr, number=10000):
 
         am = (memusage() - bm)
         assert am < 1000, "{} function {}KB Memory Leak Error".format(fc, am)
-        print("{}: {} ns (mem after {}KB)".format(fc, int(1000000000 * p / number), am))
+        try:
+            print("{}: {} ns (mem after {}KB)".format(fc, int(1000000000 * p / number), am))
+        except UnicodeEncodeError:
+            print("<UnicodeError text>: {} ns (mem after {}KB)".format(int(1000000000 * p / number), am))
         i += 1
 
 
