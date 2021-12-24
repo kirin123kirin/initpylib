@@ -1,11 +1,10 @@
-
 /* _PLEASE_PYPROJECT_NAME_.cpp | MIT License | https://github.com/kirin123kirin/_PLEASE_PYPROJECT_NAME_/raw/_PLEASE_EXECUTABLE_FILENAME_/LICENSE */
-
 #pragma once
-#ifndef CSANKEY_HPP
-#define CSANKEY_HPP
+#ifndef _PLEASE_PYPROJECT_NAME__HPP
+#define _PLEASE_PYPROJECT_NAME__HPP
 
 #include <Python.h>
+// #include <datetime.h>
 
 /* Very Fast get malloc on Python environment. */
 template <class T>
@@ -49,4 +48,4 @@ PyObject* hello(const char* word = NULL) {
 	return PyUnicode_FromString(word);
 }
 
-#endif
+#endif /* _PLEASE_PYPROJECT_NAME_ */

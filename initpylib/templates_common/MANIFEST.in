@@ -2,6 +2,6 @@ include README.md
 include LICENSE
 include VERSION
 include setup.cfg
-recursive-include tools *
-recursive-include extern *
-recursive-include _PLEASE_PYPROJECT_NAME_ *
+recursive-include tools *.py
+recursive-include _PLEASE_PYPROJECT_NAME_ *.py *.cxx *.cpp *.hpp *.h *.c
+include tests/test_*

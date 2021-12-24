@@ -26,7 +26,6 @@ BUILD_DIR = "build"
 cmake_args = {
     "common": [
         # '-G', "Ninja",
-        # '-G', "Visual Studio 16 2019",
         # "-DCMAKE_C_COMPILER=clang",
         # "-DCMAKE_CXX_COMPILER=clang++",
     ],

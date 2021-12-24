@@ -20,9 +20,9 @@ extern "C" PyObject* _PLEASE_PYPROJECT_NAME__py(PyObject* self, PyObject* args, 
 
 /* {{{ */
 // this module description
-#define MODULE_DOCS                                            \
-    "_PLEASE_PYPROJECT_NAME_ Overview.\n"                      \
-    "Description xxxx.\n" \
+#define MODULE_DOCS                       \
+    "_PLEASE_PYPROJECT_NAME_ Overview.\n" \
+    "Description xxxx.\n"                 \
     ""
 
 #define _PLEASE_PYPROJECT_NAME__py_DESC "\n"
@@ -37,18 +37,35 @@ extern "C" PyObject* _PLEASE_PYPROJECT_NAME__py(PyObject* self, PyObject* args, 
 /* PyMethodDef Parameter Help
  * https://docs.python.org/ja/3/c-api/structures.html#c.PyMethodDef
  */
-static PyMethodDef py_methods[] = {PY_ADD_METHOD_KWARGS("_PLEASE_PYPROJECT_NAME_", _PLEASE_PYPROJECT_NAME__py, _PLEASE_PYPROJECT_NAME__py_DESC),
-                                   {NULL, NULL, 0, NULL}};
+static PyMethodDef py_methods[] = {
+    PY_ADD_METHOD_KWARGS("_PLEASE_PYPROJECT_NAME_", _PLEASE_PYPROJECT_NAME__py, _PLEASE_PYPROJECT_NAME__py_DESC),
+    {NULL, NULL, 0, NULL}};
 
 #if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef py_defmod = {PyModuleDef_HEAD_INIT, MODULE_NAME_S, MODULE_DOCS, 0, py_methods};
 #define PARSE_NAME(mn) PyInit_##mn
+#if defined(DATETIME_H)
+#define PARSE_FUNC(mn)                      \
+    PyMODINIT_FUNC PARSE_NAME(mn)() {       \
+        PyDateTime_IMPORT;                  \
+        return PyModule_Create(&py_defmod); \
+    }
+#else
 #define PARSE_FUNC(mn) \
     PyMODINIT_FUNC PARSE_NAME(mn)() { return PyModule_Create(&py_defmod); }
+#endif
 
+#else
+#if defined(DATETIME_H)
+#define PARSE_NAME(mn)                                                \
+    init##mn(void) {                                                  \
+        PyDateTime_IMPORT;                                            \
+        (void)Py_InitModule3(MODULE_NAME_S, py_methods, MODULE_DOCS); \
+    }
 #else
 #define PARSE_NAME(mn) \
     init##mn(void) { (void)Py_InitModule3(MODULE_NAME_S, py_methods, MODULE_DOCS); }
+#endif
 #define PARSE_FUNC(mn) PyMODINIT_FUNC PARSE_NAME(mn)
 #endif
 

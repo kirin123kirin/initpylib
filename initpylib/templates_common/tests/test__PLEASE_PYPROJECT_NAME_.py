@@ -38,6 +38,68 @@ def runtimeit(funcstr, number=10000):
         i += 1
 
 
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import os
+import sys
+
+from timeit import timeit
+from psutil import Process
+
+PY2 = sys.version_info[0] == 2
+# github action problem in windows default codepage 1252 environment
+# https://stackoverflow.com/questions/27092833/unicodeencodeerror-charmap-codec-cant-encode-characters
+defaultencoding = 'utf-8'
+if sys.stdout.encoding != defaultencoding:
+    if PY2:
+        reload(sys)
+        sys.setdefaultencoding(defaultencoding)
+    elif os.name == "nt":
+        sys.stdout.reconfigure(encoding=defaultencoding)
+
+from os.path import dirname, abspath, join as pjoin
+shome = abspath(pjoin(dirname(__file__), ".."))
+sys.path.insert(0, pjoin(shome, "build"))
+try:
+    from _PLEASE_PYPROJECT_NAME_ import *
+    kw = {"setup": "from _PLEASE_PYPROJECT_NAME_ import *"} if PY2 else {}
+except ImportError:
+    from _PLEASE_PYPROJECT_NAME_._PLEASE_PYPROJECT_NAME_ import *
+    kw = {"setup": "from _PLEASE_PYPROJECT_NAME_._PLEASE_PYPROJECT_NAME_ import *"} if PY2 else {}
+
+from socket import gethostname
+__tdpath = "/portable.app/usr/share/testdata/"
+if gethostname() == "localhost":
+    tdir = "/storage/emulated/0/Android/data/com.dropbox.android/files/u9335201/scratch" + __tdpath
+elif os.name == "posix":
+    tdir = os.getenv("HOME") + "/Dropbox/" + __tdpath
+else:
+    tdir = "Y:/usr/share/testdata/"
+
+
+process = Process(os.getpid())
+def memusage():
+    return process.memory_info()[0] / 1024
+
+def runtimeit(funcstr, number=10000):
+    i = 0
+    kw["number"] = number
+    if sys.version_info[0] >= 3:
+        kw["globals"] = globals()
+
+    for fc in funcstr.strip().splitlines():
+        fc = fc.strip()
+
+        if i == 0:
+            timeit(fc, **kw)
+        bm = memusage()
+        p = timeit(fc, **kw)
+
+        am = (memusage() - bm)
+        assert am < 10000, "{} function {}KB Memory Leak Error".format(fc, am)
+        print("{}: {} ns (mem after {}KB)".format(fc, int(1000000000 * p / number), am))
+        i += 1
+
 def test__PLEASE_PYPROJECT_NAME_():
     assert(_PLEASE_PYPROJECT_NAME_("hello"))
 

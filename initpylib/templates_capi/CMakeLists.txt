@@ -4,10 +4,6 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 14)
 
 ## --- Please your setting --- #######################################
-# set(CMAKE_C_COMPILER clang)
-
-# set(CMAKE_CXX_COMPILER clang++)
-
 project(_PLEASE_PYPROJECT_NAME_ LANGUAGES CXX C)
 
 set(EXENAME _PLEASE_EXECUTABLE_FILENAME_)
