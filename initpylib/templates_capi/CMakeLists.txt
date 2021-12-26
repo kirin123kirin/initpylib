@@ -105,6 +105,8 @@ find_package(Python3 COMPONENTS Interpreter Development)
     find_package(PythonExtensions REQUIRED)
 
     add_library(${REAL_LIBNAME} MODULE ${LIBRARY_SOURCES})
+        set_target_properties(${REAL_LIBNAME} PROPERTIES LINK_SEARCH_START_STATIC ON)
+        set_target_properties(${REAL_LIBNAME} PROPERTIES LINK_SEARCH_END_STATIC ON)
         target_include_directories(${REAL_LIBNAME} PRIVATE ${CMAKE_INSTALL_PREFIX}/include)
         target_link_directories(${REAL_LIBNAME} PRIVATE ${Python3_LIBRARY_DIRS} ${CMAKE_INSTALL_PREFIX}/lib)
 

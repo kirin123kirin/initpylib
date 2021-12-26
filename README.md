@@ -1,5 +1,5 @@
 # initpylib
-[![Upload pypi.org](https://github.com/kirin123kirin/initpylib/actions/workflows/pypi.yml/badge.svg?branch=v0.4.0)](https://github.com/kirin123kirin/initpylib/actions/workflows/pypi.yml)
+[![Upload pypi.org](https://github.com/kirin123kirin/initpylib/actions/workflows/pypi.yml/badge.svg?branch=v0.4.1)](https://github.com/kirin123kirin/initpylib/actions/workflows/pypi.yml)
 
 ## Generate Python project.
 This tool is automatically configure the files and directories needed to create a Python Library.
