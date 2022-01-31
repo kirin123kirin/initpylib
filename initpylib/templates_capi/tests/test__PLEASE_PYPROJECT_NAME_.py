@@ -4,6 +4,18 @@ import os
 import sys
 from glob import glob
 from timeit import timeit
+
+from tempfile import TemporaryDirectory
+from os.path import dirname
+
+tdir = dirname(__file__)
+
+class _tmpdir(TemporaryDirectory):
+    def __del__(self):
+        self.cleanup()
+_tmp = _tmpdir()
+TMPDIR = _tmp.name
+
 from psutil import Process
 from datetime import datetime
 if sys.version_info[:2] >= (3, 7):
@@ -37,17 +49,6 @@ except ImportError:
     except ImportError:
         from _PLEASE_PYPROJECT_NAME_.__PLEASE_PYPROJECT_NAME_ import *
         kw = {"setup": "from _PLEASE_PYPROJECT_NAME_.__PLEASE_PYPROJECT_NAME_ import *"} if PY2 else {}
-
-
-from socket import gethostname
-__tdpath = "/portable.app/usr/share/testdata/"
-if gethostname() == "localhost":
-    tdir = "/storage/emulated/0/Android/data/com.dropbox.android/files/u9335201/scratch" + __tdpath
-elif os.name == "posix":
-    tdir = os.getenv("HOME") + "/Dropbox/" + __tdpath
-else:
-    tdir = "Y:/usr/share/testdata/"
-
 
 process = Process(os.getpid())
 def memusage():
